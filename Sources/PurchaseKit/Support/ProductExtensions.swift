@@ -18,7 +18,7 @@ import StoreKit
 ///
 /// - Important:
 ///   All localized strings are resolved from `Bundle.module` via `PKL10n`.
-extension Product {
+public extension Product {
     
     // MARK: - Subscription
     
@@ -151,7 +151,7 @@ extension Product {
 
 // MARK: - Product.SubscriptionPeriod.Unit
 
-extension Product.SubscriptionPeriod.Unit {
+public extension Product.SubscriptionPeriod.Unit {
     
     /// A localized display name for the recurring interval (e.g. "month", "year").
     ///
@@ -202,7 +202,7 @@ extension Product.SubscriptionPeriod.Unit {
 
 // MARK: - Product.SubscriptionPeriod
 
-extension Product.SubscriptionPeriod {
+public extension Product.SubscriptionPeriod {
     
     /// Returns a localized description for the subscription period, e.g. "1 month".
     ///
