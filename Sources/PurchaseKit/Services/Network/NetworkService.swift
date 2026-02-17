@@ -128,7 +128,7 @@ public final class NetworkService: @unchecked Sendable {
     // MARK: - Initialization
     
     /// Creates a new network service. Call `startMonitoring()` to begin updates.
-    init() {
+    public init() {
         IAPLogger.log("NetworkService initialized")
     }
     
