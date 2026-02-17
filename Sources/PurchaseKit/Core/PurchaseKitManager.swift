@@ -190,7 +190,7 @@ public final class PurchaseKitManager: ObservableObject, PurchaseKitManagerProto
     ///
     /// - Parameter option: The type-erased purchase option to check.
     /// - Returns: `true` if the entitlement is active, otherwise `false`.
-    public func isPurchased(_ option: AnyPurchaseOption) -> Bool {
+    public func isPurchased<Option: PurchasableOption>(_ option: Option) -> Bool {
         entitlementState(for: option).isActive
     }
     
@@ -229,11 +229,15 @@ public final class PurchaseKitManager: ObservableObject, PurchaseKitManagerProto
     
     // MARK: - Purchase
     
-    /// Initiates a purchase flow for the given type-erased option.
+    /// Initiates a purchase flow for the given typed `PurchaseOption`.
     ///
-    /// - Parameter option: The option to purchase.
-    /// - Throws: `PurchaseError` if the purchase fails or cannot be initiated.
-    public func purchase(_ option: AnyPurchaseOption) async throws {
+    /// This overload is a convenience for host apps that use strongly-typed option models.
+    /// Internally the option is type-erased into `AnyPurchaseOption`.
+    ///
+    /// - Parameter option: The typed purchase option defined by the host app.
+    /// - Throws: `PurchaseError` when the purchase fails or cannot be started.
+    public func purchase<Option: PurchasableOption>(_ option: Option) async throws {
+        let anyOption = AnyPurchaseOption(option)
         guard canAttemptNetworkOperations else {
             errorMessage = PurchaseError.networkError.localizedDescription
             flowState = .failed(.networkError)
@@ -258,26 +262,15 @@ public final class PurchaseKitManager: ObservableObject, PurchaseKitManagerProto
         } catch let err as PurchaseError {
             flowState = .failed(err)
             delegate?.purchaseKitManager(self, didUpdateFlowState: flowState)
-            delegate?.purchaseKitManager(self, didFailPurchaseFor: option, error: err)
+            delegate?.purchaseKitManager(self, didFailPurchaseFor: anyOption, error: err)
             throw err
         } catch {
             let err: PurchaseError = .systemError
             flowState = .failed(err)
             delegate?.purchaseKitManager(self, didUpdateFlowState: flowState)
-            delegate?.purchaseKitManager(self, didFailPurchaseFor: option, error: err)
+            delegate?.purchaseKitManager(self, didFailPurchaseFor: anyOption, error: err)
             throw err
         }
-    }
-    
-    /// Initiates a purchase flow for the given typed `PurchaseOption`.
-    ///
-    /// This overload is a convenience for host apps that use strongly-typed option models.
-    /// Internally the option is type-erased into `AnyPurchaseOption`.
-    ///
-    /// - Parameter option: The typed purchase option defined by the host app.
-    /// - Throws: `PurchaseError` when the purchase fails or cannot be started.
-    public func purchase<Option: PurchasableOption>(_ option: Option) async throws {
-        try await purchase(AnyPurchaseOption(option))
     }
     
     // MARK: - Restore / Refresh
@@ -315,17 +308,18 @@ public final class PurchaseKitManager: ObservableObject, PurchaseKitManagerProto
     // MARK: - Lookup
     
     /// Returns the current entitlement state for a given option.
-    public func entitlementState(for option: AnyPurchaseOption) -> EntitlementState {
-        entitlements[option] ?? .inactive
+    public func entitlementState<Option: PurchasableOption>(for option: Option) -> EntitlementState {
+        let option = AnyPurchaseOption(option)
+        return entitlements[option] ?? .inactive
     }
     
     /// Convenience check for feature gating.
-    public func isEntitled(_ option: AnyPurchaseOption) -> Bool {
+    public func isEntitled<Option: PurchasableOption>(_ option: Option) -> Bool {
         entitlementState(for: option).isActive
     }
     
     /// Returns a loaded StoreKit product matching an option (if available).
-    public func product(for option: AnyPurchaseOption) -> Product? {
+    public func product<Option: PurchasableOption>(for option: Option)-> Product? {
         availableProducts.first(where: { $0.id == option.productId })
     }
     

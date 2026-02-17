@@ -96,29 +96,6 @@ public protocol PurchaseKitManagerProtocol: AnyObject {
     ///
     /// - Parameter option: The option to purchase.
     /// - Throws: `PurchaseError` when the purchase fails or cannot be started.
-    func purchase(_ option: AnyPurchaseOption) async throws
-    
-    /// Initiates a purchase flow for the given typed `PurchaseOption`.
-    ///
-    /// This overload is a convenience for host apps that still work with their own
-    /// strongly-typed option models (e.g. enums/structs). Internally the option is
-    /// type-erased into `AnyPurchaseOption` and routed through the main purchase API.
-    ///
-    /// The manager resolves the matching StoreKit `Product` and triggers `Product.purchase()`.
-    /// Entitlement updates and UI flow state changes are reported via the delegate.
-    ///
-    /// Usage pattern:
-    /// ```swift
-    /// enum AppOption: PurchaseOption {
-    ///     case proMonthly, proYearly
-    ///     // ... conformance ...
-    /// }
-    ///
-    /// try await manager.purchase(AppOption.proMonthly)
-    /// ```
-    ///
-    /// - Parameter option: The typed purchase option defined by the host app.
-    /// - Throws: `PurchaseError` when the purchase fails or cannot be started.
     func purchase<Option: PurchasableOption>(_ option: Option) async throws
     
     // MARK: - Restore / Refresh
@@ -140,19 +117,19 @@ public protocol PurchaseKitManagerProtocol: AnyObject {
     ///
     /// - Parameter option: The option to query.
     /// - Returns: Current entitlement state (defaults to `.inactive` when unknown).
-    func entitlementState(for option: AnyPurchaseOption) -> EntitlementState
+    func entitlementState<Option: PurchasableOption>(for option: Option) -> EntitlementState
     
     /// Convenience check for feature gating.
     ///
     /// - Parameter option: The option to query.
     /// - Returns: `true` if the entitlement is currently active.
-    func isEntitled(_ option: AnyPurchaseOption) -> Bool
+    func isEntitled<Option: PurchasableOption>(_ option: Option) -> Bool
     
     /// Returns a loaded StoreKit product matching an option (if available).
     ///
     /// - Parameter option: The option to resolve.
     /// - Returns: A matching `Product` or `nil` if products were not loaded yet.
-    func product(for option: AnyPurchaseOption) -> Product?
+    func product<Option: PurchasableOption>(for option: Option) -> Product?
     
     // MARK: - Promo Codes
     
