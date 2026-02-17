@@ -111,7 +111,7 @@ public final class PurchaseKitManager: ObservableObject, PurchaseKitManagerProto
     /// - prepares internal lookups (productId → option)
     ///
     /// - Parameter options: The host app-defined purchasable options.
-    public func configure<Option: PurchaseOption>(options: [Option]) {
+    public func configure<Option: PurchasableOption>(options: [Option]) {
         let erased = options.map { AnyPurchaseOption($0) }
         self.options = erased
         self.optionByProductId = Dictionary(uniqueKeysWithValues: erased.map { ($0.productId, $0) })
@@ -209,7 +209,7 @@ public final class PurchaseKitManager: ObservableObject, PurchaseKitManagerProto
     ///
     /// - Parameter option: The typed purchase option defined by the host app.
     /// - Throws: `PurchaseError` when the purchase fails or cannot be started.
-    public func purchase<Option: PurchaseOption>(_ option: Option) async throws {
+    public func purchase<Option: PurchasableOption>(_ option: Option) async throws {
         try await purchase(AnyPurchaseOption(option))
     }
     
@@ -220,7 +220,7 @@ public final class PurchaseKitManager: ObservableObject, PurchaseKitManagerProto
     /// This is required because `TransactionService` builds a typed snapshot first.
     ///
     /// - Parameter options: The host app-defined purchasable options.
-    public func restorePurchases<Option: PurchaseOption>(options: [Option]) async {
+    public func restorePurchases<Option: PurchasableOption>(options: [Option]) async {
         flowState = .purchasing
         delegate?.purchaseKitManager(self, didUpdateFlowState: flowState)
         
@@ -233,7 +233,7 @@ public final class PurchaseKitManager: ObservableObject, PurchaseKitManagerProto
     /// Refreshes entitlements from the App Store for the given typed options.
     ///
     /// - Parameter options: The host app-defined purchasable options.
-    public func refreshPurchases<Option: PurchaseOption>(options: [Option]) async {
+    public func refreshPurchases<Option: PurchasableOption>(options: [Option]) async {
         guard canAttemptNetworkOperations else {
             IAPLogger.log("Skipping refreshPurchases(options:) - no network available.", level: .warning)
             return

@@ -75,7 +75,7 @@ public protocol PurchaseKitManagerProtocol: AnyObject {
     /// - enforce subscription exclusivity within an offering (optional)
     ///
     /// - Parameter options: The host app's purchasable options.
-    func configure<Option: PurchaseOption>(options: [Option])
+    func configure<Option: PurchasableOption>(options: [Option])
     
     // MARK: - Product Loading
     
@@ -119,7 +119,7 @@ public protocol PurchaseKitManagerProtocol: AnyObject {
     ///
     /// - Parameter option: The typed purchase option defined by the host app.
     /// - Throws: `PurchaseError` when the purchase fails or cannot be started.
-    func purchase<Option: PurchaseOption>(_ option: Option) async throws
+    func purchase<Option: PurchasableOption>(_ option: Option) async throws
     
     // MARK: - Restore / Refresh
     
@@ -127,12 +127,12 @@ public protocol PurchaseKitManagerProtocol: AnyObject {
     ///
     /// Required by App Store guidelines for non-consumables and subscriptions.
     /// Results are emitted via the delegate as a full entitlement snapshot.
-    func restorePurchases<Option: PurchaseOption>(options: [Option]) async
+    func restorePurchases<Option: PurchasableOption>(options: [Option]) async
     
     /// Refreshes entitlements from the App Store without showing UI.
     ///
     /// Call this on app foreground to detect renewals, cancellations, refunds, etc.
-    func refreshPurchases<Option: PurchaseOption>(options: [Option]) async
+    func refreshPurchases<Option: PurchasableOption>(options: [Option]) async
     
     // MARK: - Lookup
     

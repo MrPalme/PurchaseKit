@@ -68,7 +68,7 @@ public struct AnyPurchaseOption: Hashable, Sendable {
     /// Creates a type-erased representation of a concrete `PurchaseOption`.
     ///
     /// - Parameter option: The host app's concrete option instance.
-    public init<Option: PurchaseOption>(_ option: Option) {
+    public init<Option: PurchasableOption>(_ option: Option) {
         self.id = option.id
         self.productId = option.productId
         self.purchaseType = option.purchaseType

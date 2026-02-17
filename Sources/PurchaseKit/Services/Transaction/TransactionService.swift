@@ -70,7 +70,7 @@ public final class TransactionService: @unchecked Sendable {
     /// - purchases on other devices
     ///
     /// - Parameter options: The set of options that should be recognized and mapped.
-    public func startListening<Option: PurchaseOption>(options: [Option]) {
+    public func startListening<Option: PurchasableOption>(options: [Option]) {
         // Build mapping outside the queue to avoid capturing `options` in a potentially @Sendable closure.
         let map = Dictionary(uniqueKeysWithValues: options.map { ($0.productId, AnyPurchaseOption($0)) })
         
@@ -110,7 +110,7 @@ public final class TransactionService: @unchecked Sendable {
     ///   - product: The resolved StoreKit `Product` matching `option.productId`.
     /// - Returns: The raw StoreKit `Product.PurchaseResult`.
     /// - Throws: Errors thrown by StoreKit if the purchase cannot be initiated.
-    public func purchase<Option: PurchaseOption>(_ option: Option, product: Product) async throws -> Product.PurchaseResult {
+    public func purchase<Option: PurchasableOption>(_ option: Option, product: Product) async throws -> Product.PurchaseResult {
         IAPLogger.log("Initiating purchase for option: \(option.productId)")
         
         let result = try await product.purchase()
@@ -131,7 +131,7 @@ public final class TransactionService: @unchecked Sendable {
     /// Synchronizes with the App Store and returns a snapshot of current entitlements.
     ///
     /// - Parameter options: Known options used to map `productId` → option.
-    public func restorePurchases<Option: PurchaseOption>(options: [Option]) async {
+    public func restorePurchases<Option: PurchasableOption>(options: [Option]) async {
         do {
             try await AppStore.sync()
             let snapshot: [Option: EntitlementState] = await fetchCurrentEntitlements(options: options)
@@ -155,19 +155,19 @@ public final class TransactionService: @unchecked Sendable {
     ///
     /// - Parameter options: Known options used to map `productId` → option.
     /// - Returns: A dictionary mapping each known option to its derived entitlement state.
-    public func processCurrentEntitlements<Option: PurchaseOption>(options: [Option]) async -> [Option: EntitlementState] {
+    public func processCurrentEntitlements<Option: PurchasableOption>(options: [Option]) async -> [Option: EntitlementState] {
         await fetchCurrentEntitlements(options: options)
     }
     
     // MARK: - Private
     
-    private func eraseSnapshot<Option: PurchaseOption>(
+    private func eraseSnapshot<Option: PurchasableOption>(
         _ snapshot: [Option: EntitlementState]
     ) -> [AnyPurchaseOption: EntitlementState] {
         Dictionary(uniqueKeysWithValues: snapshot.map { (AnyPurchaseOption($0.key), $0.value) })
     }
     
-    private func fetchCurrentEntitlements<Option: PurchaseOption>(options: [Option]) async -> [Option: EntitlementState] {
+    private func fetchCurrentEntitlements<Option: PurchasableOption>(options: [Option]) async -> [Option: EntitlementState] {
         let optionById = Dictionary(uniqueKeysWithValues: options.map { ($0.productId, $0) })
         var result: [Option: EntitlementState] = [:]
         

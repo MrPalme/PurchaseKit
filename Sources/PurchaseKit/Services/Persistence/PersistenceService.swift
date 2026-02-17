@@ -89,7 +89,7 @@ public final class PersistenceService {
     ///
     /// - Parameter options: The options known to the host app (used for mapping).
     /// - Returns: A dictionary mapping each option to its cached entitlement state.
-    public func loadEntitlements<Option: PurchaseOption>(options: [Option]) -> [Option: EntitlementState] {
+    public func loadEntitlements<Option: PurchasableOption>(options: [Option]) -> [Option: EntitlementState] {
         let byProductId = loadEntitlementsByProductId()
         guard byProductId.isEmpty == false else { return [:] }
         

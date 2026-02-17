@@ -1,5 +1,5 @@
 //
-//  PurchaseOption.swift
+//  PurchasableOption.swift
 //  PurchaseKit
 //
 //  Created by Markus Mock on 16.02.26.
@@ -13,7 +13,7 @@ import Foundation
 /// - "Pro Monthly" (auto-renewable subscription)
 /// - "Pro Yearly" (auto-renewable subscription)
 /// - "Lifetime" (non-consumable)
-public protocol PurchaseOption: Hashable, Sendable {
+public protocol PurchasableOption: Hashable, Sendable {
     
     /// A stable identifier for app-side routing/analytics (not necessarily the StoreKit id).
     var id: String { get }

@@ -65,7 +65,7 @@ public final class ProductService: @unchecked Sendable {
     ///   Invalid or missing product identifiers are not considered fatal by StoreKit 2.
     ///   If a product id does not resolve, it will simply be absent from the returned dictionary.
     @discardableResult
-    public func loadProducts<Option: PurchaseOption>(
+    public func loadProducts<Option: PurchasableOption>(
         for options: [Option],
         policy: CachePolicy = .useCache
     ) async throws -> [String: Product] {
@@ -139,7 +139,7 @@ public final class ProductService: @unchecked Sendable {
     ///
     /// - Parameter option: The option whose StoreKit product should be returned.
     /// - Returns: The cached `Product` or `nil` if it has not been loaded yet.
-    public func product<Option: PurchaseOption>(for option: Option) -> Product? {
+    public func product<Option: PurchasableOption>(for option: Option) -> Product? {
         cacheQueue.sync { cacheByProductId[option.productId] }
     }
     
