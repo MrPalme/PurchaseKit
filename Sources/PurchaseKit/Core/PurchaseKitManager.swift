@@ -52,6 +52,59 @@ public final class PurchaseKitManager: ObservableObject, PurchaseKitManagerProto
     /// Optional user-facing error message (library does not enforce UX).
     @Published public private(set) var errorMessage: String?
     
+    // MARK: - Derived State
+
+    /// `true` if at least one configured **auto-renewable subscription** is currently active.
+    ///
+    /// This is a UI convenience for paywalls/settings screens (e.g. showing “Subscribed” state).
+    /// It only considers options where `purchaseType == .autoRenewableSubscription`.
+    ///
+    /// - Important: This does **not** include non-consumables. Use `hasAnyActiveEntitlement`
+    ///   if you want a broader “premium unlocked” check.
+    /// - Note: Requires `configure(options:)` to be called first.
+    public var hasAnyActiveSubscription: Bool {
+        activeSubscriptions.isEmpty == false
+    }
+
+    /// Returns all configured options that represent an **active subscription**.
+    ///
+    /// The result is derived from `entitlements` and filtered by:
+    /// - `option.purchaseType == .autoRenewableSubscription`
+    /// - `EntitlementState.isActive == true`
+    ///
+    /// The array is sorted by `sortOrder` to keep UI stable.
+    ///
+    /// - Note: If you enforce subscription exclusivity, this will typically contain **at most one**
+    ///   element. If multiple subscriptions are active (edge case), all active ones are returned.
+    public var activeSubscriptions: [AnyPurchaseOption] {
+        entitlements
+            .filter { (option, state) in
+                option.purchaseType == .autoRenewableSubscription && state.isActive
+            }
+            .map(\.key)
+            .sorted { $0.sortOrder < $1.sortOrder }
+    }
+
+    /// A single “primary” active subscription option, if any.
+    ///
+    /// Use this if your product model enforces subscription exclusivity (e.g. only one tier can be active).
+    /// If multiple subscriptions are active (edge case), the first by `sortOrder` is returned.
+    ///
+    /// - Returns: The primary active subscription option, or `nil` if none is active.
+    public var primaryActiveSubscription: AnyPurchaseOption? {
+        activeSubscriptions.first
+    }
+
+    /// `true` if **any** entitlement is active (subscriptions OR non-consumables).
+    ///
+    /// Useful for “premium unlocked” apps where either a lifetime purchase OR a subscription
+    /// should unlock functionality.
+    ///
+    /// - Note: This is a snapshot-based convenience derived from `entitlements`.
+    public var hasAnyActiveEntitlement: Bool {
+        entitlements.values.contains(where: { $0.isActive })
+    }
+    
     // MARK: - Delegate
     
     public weak var delegate: PurchaseKitDelegate?
@@ -125,6 +178,20 @@ public final class PurchaseKitManager: ObservableObject, PurchaseKitManagerProto
             initial[option] = entitlements[option] ?? .inactive
         }
         entitlements = initial
+    }
+    
+    // MARK: - Public Access
+    
+    /// Returns `true` if the given option is currently entitled (active).
+    ///
+    /// This is a convenience wrapper around `entitlementState(for:)`.
+    /// For subscriptions this means the subscription is currently active.
+    /// For non-consumables this means it was purchased and not revoked/refunded.
+    ///
+    /// - Parameter option: The type-erased purchase option to check.
+    /// - Returns: `true` if the entitlement is active, otherwise `false`.
+    public func isPurchased(_ option: AnyPurchaseOption) -> Bool {
+        entitlementState(for: option).isActive
     }
     
     // MARK: - Product Loading
