@@ -233,7 +233,8 @@ enum AppPurchaseFeature: CaseIterable, Feature {
         case .photoCredits: return "subscription_feature_shooting_credits_description".localized
         }
     }
-}```
+}
+```
 
 And (optionally) map them to an offering:
 
@@ -248,7 +249,8 @@ enum AppPurchaseOffering: CaseIterable, PurchaseOffering {
     var description: String? { "All features available" }
     var features: [any Feature] { AppPurchaseFeature.allCases }
     var sortOrder: Int { 0 }
-}}```
+}}
+```
 
 ## UI Building Blocks
 
